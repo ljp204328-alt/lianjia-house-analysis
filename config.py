@@ -46,6 +46,11 @@ class Config:
     # ================= 接口缓存（秒） =================
     CACHE_TTL = 300
 
+    # ================= 大模型（AI 问答助手，OpenAI 兼容格式） =================
+    LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+    LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.deepseek.com")
+    LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
+
     # ================= 机器学习模型 =================
     MODEL_DIR = os.path.join(BASE_DIR, "spark", "ml", "model")
     PIPELINE_PATH = os.path.join(MODEL_DIR, "pipeline_model.pkl")

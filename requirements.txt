@@ -21,3 +21,6 @@ pandas<2.3
 scikit-learn
 joblib
 Pillow>=9.0.0
+
+# ================= AI 智能问答（DeepSeek，OpenAI 兼容接口） =================
+openai>=1.0.0

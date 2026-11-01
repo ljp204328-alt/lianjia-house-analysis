@@ -4,7 +4,7 @@
 
 本项目是一个完整的大数据分析系统，通过爬取链家网全国租房数据，利用Spark进行数据处理和分析，最终以可视化大屏的形式展示分析结果。
 
-**技术栈：** Python + Spark + Hive + HDFS + MySQL + FastAPI + Vue + ECharts + Scikit-learn
+**技术栈：** Python + Spark + Hive + HDFS + MySQL + FastAPI + Vue + ECharts + Scikit-learn + DeepSeek大模型（AI智能问答）
 
 ![数据可视化大屏](docs/home_dashboard.png)
 
@@ -78,6 +78,10 @@
 │   ├── models.py              # PyMySQL用户数据访问层（zufangdata库）
 │   └── auth.py                # JWT签发与校验（PyJWT，Token前缀手工解析）
 │
+├── ai/                        # AI智能问答路由（/ai，大模型+Function Calling）
+│   ├── __init__.py            # 路由导出
+│   └── views.py               # /ai/chat/ 智能问答（DeepSeek工具调用查真实数据）
+│
 ├── config.py                  # 全局配置（两个MySQL、JWT、端口、缓存时长）
 ├── app.py                     # FastAPI入口（路由挂载、CORS、建表、启动8000）
 │
@@ -91,7 +95,8 @@
 │   │   ├── router/index.js    # 路由配置
 │   │   ├── utils/request.js   # Axios封装
 │   │   └── components/
-│   │       └── TechBackground.vue  # 粒子背景组件
+│   │       ├── TechBackground.vue  # 粒子背景组件
+│   │       └── AiChat.vue          # AI智能助手悬浮面板（右下角）
 │   └── package.json           # 前端依赖
 │
 ├── requirements.txt           # Python依赖
@@ -170,6 +175,7 @@
 | `/analysis/api/rent-model-info/` | GET | 模型信息和可选项 |
 | `/users/api/register/` | POST | 用户注册 |
 | `/users/api/login/` | POST | 用户登录 |
+| `/ai/chat/` | POST | AI智能问答（登录后可用，DeepSeek自动调用分析接口） |
 
 ---
 
@@ -308,6 +314,16 @@ JWT_HEADER_TYPE = "Token"                # 前端携带格式为 Authorization: 
 PORT = 8000                              # 可用环境变量 API_PORT 覆盖，与 frontend/src/utils/request.js 的 baseURL 保持一致
 CACHE_TTL = 300                          # 接口缓存时长（秒）
 ```
+
+### 大模型（AI智能问答）
+`.env` 中另外配置三项后，首页大屏右下角即出现 AI 助手悬浮球：
+```
+LLM_API_KEY=sk-xxxx          # DeepSeek 平台申请的 Key
+LLM_BASE_URL=https://api.deepseek.com
+LLM_MODEL=deepseek-chat
+```
+- 后端 `/ai/chat/` 采用 OpenAI 兼容接口 + Function Calling：模型自动选择调用 9 个数据查询工具（城市租金榜、价格分布、户型分布、热门楼盘、必看好房、房源搜索等——全部为参数化 SQL，只查不写）
+- 不填 `LLM_API_KEY` 时接口返回友好提示，其余功能不受影响
 
 ### 高德API（经纬度获取）
 - 用于获取区县和小区的经纬度坐标

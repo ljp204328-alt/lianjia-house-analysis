@@ -5,6 +5,7 @@ FastAPI 后端入口。
 接口前缀：
   /analysis/api/*   16 个数据分析接口（公开）
   /users/*          注册 / 登录 / 用户信息（info 需登录）
+  /ai/*             AI 智能问答助手（chat 需登录）
 """
 import sys
 
@@ -39,10 +40,12 @@ app.add_middleware(
 )
 
 from analysis import analysis_router  # noqa: E402
+from ai import ai_router  # noqa: E402
 from users import users_router  # noqa: E402
 
 app.include_router(analysis_router)
 app.include_router(users_router)
+app.include_router(ai_router)
 
 
 # ---- 统一错误响应（保持原 Flask 版格式） ----
@@ -83,6 +86,7 @@ def index():
         "endpoints": {
             "analysis": "/analysis/api/*",
             "users": "/users/register/ /users/login/ /users/info/",
+            "ai": "/ai/chat/",
         },
     }
 

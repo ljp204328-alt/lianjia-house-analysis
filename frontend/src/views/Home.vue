@@ -330,6 +330,7 @@
         </div>
       </div>
     </dv-border-box-13>
+    <AiChat />
   </div>
 </template>
 
@@ -338,11 +339,12 @@ import * as echarts from 'echarts';
 import 'echarts-gl';
 import 'echarts-wordcloud';
 import TechBackground from '@/components/TechBackground.vue';
+import AiChat from '@/components/AiChat.vue';
 import request from '@/utils/request';
 
 export default {
-  name: 'Home',
-  components: { TechBackground },
+
+components: { TechBackground, AiChat },
   data() {
     return {
       currentTime: '',
