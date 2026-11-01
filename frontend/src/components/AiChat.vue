@@ -94,7 +94,17 @@ export default {
     renderMarkdown(text) {
       let html = (text || '')
         .replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
-      // 简易 markdown：加粗 + 换行（不引第三方库，保持依赖干净）
+      // 简易 markdown：链接 + 加粗 + 换行（不引第三方库，保持依赖干净）
+      // [文字](url) → 可点击链接
+      html = html.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener">$1</a>'
+      );
+      // 裸链接也转成可点击
+      html = html.replace(
+        /(^|[^"'>])((https?:\/\/)[^\s<]+)/g,
+        '$1<a href="$2" target="_blank" rel="noopener">$2</a>'
+      );
       html = html.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
       return html.replace(/\n/g, '<br/>');
     },
@@ -308,6 +318,7 @@ export default {
   border-top-left-radius: 2px;
 }
 .is-bot .ai-bubble :deep(b) { color: #7fe3ff; }
+.is-bot .ai-bubble :deep(a) { color: #4dd8ff; text-decoration: underline; word-break: break-all; }
 
 .ai-tools {
   font-size: 11px;

@@ -41,8 +41,10 @@ SYSTEM_PROMPT = (
     "2. 涉及数据、排行、房源、价格的问题，必须先调用工具拿真实数据，"
     "绝不凭空编造数字；一次可以并行调用多个工具。\n"
     "3. 推荐房源时给出：城市、城区、小区名、户型、面积、均价，并说明该价格处于什么水平。\n"
-    "4. 数据只覆盖链家网收录的城市，用户问的城市没有数据时如实说明。\n"
-    "5. 结尾可自然加一句：以上基于 18000+ 套链家在租房源的 Spark 分析结果酌情参考。"
+    "4. 工具结果里若有 detail_url 字段，推荐时附上房源链接（Markdown 格式 [点击查看房源](链接)），"
+    "但实际租价可能已变动，以链接页面为准。\n"
+    "5. 数据只覆盖链家网收录的城市，用户问的城市没有数据时如实说明。\n"
+    "6. 结尾可自然加一句：以上基于 18000+ 套链家在租房源的 Spark 分析结果酌情参考。"
 )
 
 
@@ -85,7 +87,7 @@ def _t_top10_buildings():
 def _t_featured_houses(limit=10):
     limit = max(1, min(int(limit or 10), 20))
     return execute_query(
-        "SELECT city, community_name, house_type, price, avg_price, tags "
+        "SELECT city, community_name, house_type, price, avg_price, tags, detail_url "
         "FROM featured_houses LIMIT %s",
         (limit,),
     )
@@ -129,7 +131,7 @@ def _t_search_houses(city=None, price_min=None, price_max=None,
         where.append("house_type LIKE %s")
         params.append(f"%{str(house_type).strip()}%")
 
-    sql = "SELECT city, district, community_name, house_type, area, price, direction, floor_type FROM house_details"
+    sql = "SELECT city, district, community_name, house_type, area, price, direction, floor_type, detail_url FROM house_details"
     if where:
         sql += " WHERE " + " AND ".join(where)
     sql += " ORDER BY price ASC LIMIT %s"
