@@ -4,7 +4,7 @@
 
 本项目是一个完整的大数据分析系统，通过爬取链家网全国租房数据，利用Spark进行数据处理和分析，最终以可视化大屏的形式展示分析结果。
 
-**技术栈：** Python + Spark + Hive + HDFS + MySQL + FastAPI + Vue + ECharts + Scikit-learn + DeepSeek大模型（AI智能问答）
+**技术栈：** Python + Spark + Hive + HDFS + MySQL + FastAPI + Vue + ECharts + Scikit-learn + DeepSeek大模型（AI智能体）
 
 ![数据可视化大屏](docs/home_dashboard.png)
 
@@ -78,9 +78,9 @@
 │   ├── models.py              # PyMySQL用户数据访问层（zufangdata库）
 │   └── auth.py                # JWT签发与校验（PyJWT，Token前缀手工解析）
 │
-├── ai/                        # AI智能问答路由（/ai，大模型+Function Calling）
+├── ai/                        # AI智能体路由（/ai，大模型+Function Calling工具调用）
 │   ├── __init__.py            # 路由导出
-│   └── views.py               # /ai/chat/ 智能问答（DeepSeek工具调用查真实数据）
+│   └── views.py               # /ai/chat/ 智能体问答（自主调度9个数据工具查真实数据）
 │
 ├── config.py                  # 全局配置（两个MySQL、JWT、端口、缓存时长）
 ├── app.py                     # FastAPI入口（路由挂载、CORS、建表、启动8000）
@@ -96,7 +96,7 @@
 │   │   ├── utils/request.js   # Axios封装
 │   │   └── components/
 │   │       ├── TechBackground.vue  # 粒子背景组件
-│   │       └── AiChat.vue          # AI智能助手悬浮面板（右下角）
+│   │       └── AiChat.vue          # AI智能体对话面板（右下角悬浮球）
 │   └── package.json           # 前端依赖
 │
 ├── requirements.txt           # Python依赖
@@ -175,7 +175,7 @@
 | `/analysis/api/rent-model-info/` | GET | 模型信息和可选项 |
 | `/users/api/register/` | POST | 用户注册 |
 | `/users/api/login/` | POST | 用户登录 |
-| `/ai/chat/` | POST | AI智能问答（登录后可用，DeepSeek自动调用分析接口） |
+| `/ai/chat/` | POST | AI智能体问答（登录后可用，模型自主调度数据工具查真实分析结果） |
 
 ---
 
@@ -192,6 +192,7 @@
 - **中间：** 全国地图（点击省份查看详情）、价格区间分布、租赁方式饼图
 - **右侧：** 户型分布、城市房源TOP10（滚动）、必看好房列表（滚动）、小区词云
 - **底部：** 租金趋势折线图、热门楼盘TOP10
+- **右下角：** AI智能体对话面板（悬浮球展开，基于大数据智能问答大模型自主调度分析工具）
 
 ### 3. 省份详情页（CityDetail.vue）
 - **地图：** 区县气泡图（显示房源数和均价）
@@ -315,14 +316,15 @@ PORT = 8000                              # 可用环境变量 API_PORT 覆盖，
 CACHE_TTL = 300                          # 接口缓存时长（秒）
 ```
 
-### 大模型（AI智能问答）
+### 大模型（AI智能体问答）
 `.env` 中另外配置三项后，首页大屏右下角即出现 AI 助手悬浮球：
 ```
 LLM_API_KEY=sk-xxxx          # DeepSeek 平台申请的 Key
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-chat
 ```
-- 后端 `/ai/chat/` 采用 OpenAI 兼容接口 + Function Calling：模型自动选择调用 9 个数据查询工具（城市租金榜、价格分布、户型分布、热门楼盘、必看好房、房源搜索等——全部为参数化 SQL，只查不写）
+- 属于**大模型驱动的智能体（Agent）**，不是纯聊天模型：采用 OpenAI 兼容接口 + Function Calling，让模型对每个问题自主决策调用哪些工具（推理 → 调工具 → 回填数据 → 再推理 → 作答）
+- 9 个数据查询工具：城市租金榜、价格分布、户型分布、热门楼盘、必看好房、租赁方式占比、城市房源量、房源搜索、全库总况——全部为参数化 SQL，只查不写
 - 不填 `LLM_API_KEY` 时接口返回友好提示，其余功能不受影响
 
 ### 高德API（经纬度获取）

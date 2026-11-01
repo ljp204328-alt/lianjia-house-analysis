@@ -5,7 +5,7 @@ FastAPI 后端入口。
 接口前缀：
   /analysis/api/*   16 个数据分析接口（公开）
   /users/*          注册 / 登录 / 用户信息（info 需登录）
-  /ai/*             AI 智能问答助手（chat 需登录）
+  /ai/*             AI 智能体问答（chat 需登录）
 """
 import sys
 
