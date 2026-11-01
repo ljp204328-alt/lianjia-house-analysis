@@ -80,7 +80,6 @@
 │
 ├── config.py                  # 全局配置（两个MySQL、JWT、端口、缓存时长）
 ├── app.py                     # FastAPI入口（路由挂载、CORS、建表、启动8000）
-├── test_api.py                # 18个接口22项自测脚本
 │
 ├── frontend/                  # Vue前端
 │   ├── src/
@@ -275,12 +274,6 @@ python app.py
 
 > 无数据库迁移步骤：用户表在启动时幂等创建（`CREATE TABLE IF NOT EXISTS`）。
 > 框架默认不开启热重载，改后端代码后需手动重启。
-
-**接口自测（可选）：**
-```bash
-# 后端启动后另开一个终端
-python test_api.py
-```
 
 ### 3. 前端启动
 ```bash
