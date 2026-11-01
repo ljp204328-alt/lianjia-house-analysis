@@ -6,6 +6,8 @@
 
 **技术栈：** Python + Spark + Hive + HDFS + MySQL + FastAPI + Vue + ECharts + Scikit-learn
 
+![数据可视化大屏](docs/home_dashboard.png)
+
 ---
 
 ## 二、系统架构
