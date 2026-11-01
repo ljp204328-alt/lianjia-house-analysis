@@ -1,0 +1,23 @@
+# ================= Web 后端（FastAPI） =================
+fastapi==0.162.0
+uvicorn==0.46.0
+python-dotenv>=1.0.0
+PyJWT>=2.6.0
+PyMySQL==1.0.2
+Werkzeug>=2.3.0
+
+# ================= 爬虫模块（spider/） =================
+requests>=2.28.0
+beautifulsoup4>=4.12.0
+DrissionPage>=4.0.0
+
+# ================= 数据处理（spark/，在虚拟机执行） =================
+hdfs>=2.7.0
+pyspark
+pyarrow
+
+# ================= 机器学习（租金预测模型） =================
+pandas<2.3
+scikit-learn
+joblib
+Pillow>=9.0.0

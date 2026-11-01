@@ -1,0 +1,82 @@
+/root/start_project.sh
+/root/stop_project.sh
+netstat -anp | grep 10000
+
+# ================= 数据处理流程 =================
+# 注意：项目路径为 /mnt/pycharm/spark/
+
+# 1. 上传数据到HDFS
+cd /mnt/pycharm/spider
+hdfs dfs -put -f house.csv /data/lianjia/
+
+# 2. ODS层：加载数据到Hive
+cd /mnt/pycharm/spark
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml ODS.py
+
+# 3. DWD层：数据清洗
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml DWD.py
+
+# 4. ADS层：省份区域分析
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml detailADS.py
+
+# ================= 数据写入MySQL =================
+
+cd /mnt/pycharm/spark/data_scripts
+
+# 建表（首次执行）
+mysql -u root -p123456 < /mnt/pycharm/spark/data_scripts/init.sql
+# 获取区县经纬度（首次执行）
+spark-submit fetch_area_geo.py
+
+# 生成小区统计
+spark-submit generate_community_stats.py
+
+# 获取小区经纬度
+spark-submit fetch_community_geo.py
+
+# 首页数据
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml get_home_data.py
+
+# 省份详情
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml get_detail_data.py
+
+# 城市租金排行
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml cityRentRank.py
+
+# 城市房源数量TOP10
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml cityHouseCountTop10.py
+
+# 价格分布
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml price_distribution.py
+
+# 租赁方式分析
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml rentTypeAnalysis.py
+
+# 户型分布
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml houseTypeAnalysis.py
+
+# 热门楼盘TOP10
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml top10_buildings.py
+
+# 必看好房
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml featuredHouses.py
+
+# 小区词云
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml communityWordCloud.py
+
+# 租金趋势
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml cityRentTrend.py
+
+# 区县统计
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml generate_district_stats.py
+
+# 房源详情
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml generate_house_details.py
+
+# ================= 机器学习模型训练 =================
+
+# 安装依赖（首次执行）
+pip install "pandas<2.3" scikit-learn joblib
+
+# 训练租金预测模型
+spark-submit --jars /opt/software/hive/lib/mysql-connector-java-5.1.49-bin.jar --files /opt/software/hive/conf/hive-site.xml /mnt/pycharm/spark/ml/train_rent_model.py
